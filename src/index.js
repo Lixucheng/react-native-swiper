@@ -292,11 +292,9 @@ export default class extends Component {
     // related to https://github.com/leecade/react-native-swiper/issues/570
     // contentOffset is not working in react 0.48.x so we need to use scrollTo
     // to emulate offset.
-    if (Platform.OS === 'ios') {
-      if (this.initialRender && this.state.total > 1) {
-        this.scrollView.scrollTo({...offset, animated: false})
-        this.initialRender = false;
-      }
+    if (this.initialRender && this.state.total > 1) {
+      this.scrollView.scrollTo({...offset, animated: false})
+      this.initialRender = false;
     }
 
     this.setState(state)
@@ -461,11 +459,11 @@ export default class extends Component {
     if (state.dir === 'x') x = diff * state.width
     if (state.dir === 'y') y = diff * state.height
 
-    if (Platform.OS !== 'ios') {
-      this.scrollView && this.scrollView[animated ? 'setPage' : 'setPageWithoutAnimation'](diff)
-    } else {
-      this.scrollView && this.scrollView.scrollTo({ x, y, animated })
-    }
+    this.scrollView && this.scrollView.scrollTo({ x, y, animated })
+    // if (Platform.OS !== 'ios') {
+    // } else {
+    //   this.scrollView && this.scrollView.scrollTo({ x, y, animated })
+    // }
 
     // update scroll state
     this.internals.isScrolling = true
@@ -474,15 +472,15 @@ export default class extends Component {
     })
 
     // trigger onScrollEnd manually in android
-    if (!animated || Platform.OS !== 'ios') {
-      setImmediate(() => {
-        this.onScrollEnd({
-          nativeEvent: {
-            position: diff
-          }
-        })
-      })
-    }
+    // if (!animated || Platform.OS !== 'ios') {
+    //   setImmediate(() => {
+    //     this.onScrollEnd({
+    //       nativeEvent: {
+    //         position: diff
+    //       }
+    //     })
+    //   })
+    // }
   }
 
   scrollViewPropOverrides = () => {
@@ -620,31 +618,32 @@ export default class extends Component {
   }
 
   renderScrollView = pages => {
-    if (Platform.OS === 'ios') {
-      return (
-        <ScrollView ref={this.refScrollView}
-          {...this.props}
-          {...this.scrollViewPropOverrides()}
-          contentContainerStyle={[styles.wrapperIOS, this.props.style]}
-          contentOffset={this.state.offset}
-          onScrollBeginDrag={this.onScrollBegin}
-          onMomentumScrollEnd={this.onScrollEnd}
-          onScrollEndDrag={this.onScrollEndDrag}
-          style={this.props.scrollViewStyle}>
-          {pages}
-        </ScrollView>
-       )
-    }
     return (
-      <ViewPagerAndroid ref={this.refScrollView}
+      <ScrollView ref={this.refScrollView}
         {...this.props}
-        initialPage={this.props.loop ? this.state.index + 1 : this.state.index}
-        onPageSelected={this.onScrollEnd}
-        key={pages.length}
-        style={[styles.wrapperAndroid, this.props.style]}>
+        {...this.scrollViewPropOverrides()}
+        contentContainerStyle={[styles.wrapperIOS, this.props.style]}
+        contentOffset={this.state.offset}
+        onScrollBeginDrag={this.onScrollBegin}
+        onMomentumScrollEnd={this.onScrollEnd}
+        onScrollEndDrag={this.onScrollEndDrag}
+        style={this.props.scrollViewStyle}>
         {pages}
-      </ViewPagerAndroid>
-    )
+      </ScrollView>
+     )
+    // if (Platform.OS === 'ios') {
+      
+    // }
+    // return (
+    //   <ViewPagerAndroid ref={this.refScrollView}
+    //     {...this.props}
+    //     initialPage={this.props.loop ? this.state.index + 1 : this.state.index}
+    //     onPageSelected={this.onScrollEnd}
+    //     key={pages.length}
+    //     style={[styles.wrapperAndroid, this.props.style]}>
+    //     {pages}
+    //   </ViewPagerAndroid>
+    // )
   }
 
   /**
